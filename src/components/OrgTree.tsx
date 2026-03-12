@@ -38,6 +38,7 @@ export function OrgTree() {
   const [zoom, setZoom] = useState(0.75);
   const [pan, setPan] = useState({ x: 40, y: 40 });
   const [isPanning, setIsPanning] = useState(false);
+  const didPan = useRef(false);
   const panStart = useRef({ x: 0, y: 0, panX: 0, panY: 0 });
 
   const handleWheel = useCallback((e: React.WheelEvent) => {
@@ -45,22 +46,35 @@ export function OrgTree() {
       e.preventDefault();
       const delta = e.deltaY > 0 ? -0.05 : 0.05;
       setZoom(prev => Math.max(0.2, Math.min(2, prev + delta)));
+    } else {
+      // Scroll / trackpad to pan
+      setPan(prev => ({
+        x: prev.x - e.deltaX,
+        y: prev.y - e.deltaY,
+      }));
     }
   }, []);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    if (e.button === 1 || (e.button === 0 && e.altKey)) {
+    // Left click or middle click on background starts panning
+    if (e.button === 0 || e.button === 1) {
       e.preventDefault();
       setIsPanning(true);
+      didPan.current = false;
       panStart.current = { x: e.clientX, y: e.clientY, panX: pan.x, panY: pan.y };
     }
   }, [pan]);
 
   const handleMouseMove = useCallback((e: React.MouseEvent) => {
     if (isPanning) {
+      const dx = e.clientX - panStart.current.x;
+      const dy = e.clientY - panStart.current.y;
+      if (Math.abs(dx) > 3 || Math.abs(dy) > 3) {
+        didPan.current = true;
+      }
       setPan({
-        x: panStart.current.panX + (e.clientX - panStart.current.x),
-        y: panStart.current.panY + (e.clientY - panStart.current.y),
+        x: panStart.current.panX + dx,
+        y: panStart.current.panY + dy,
       });
     }
   }, [isPanning]);
@@ -69,8 +83,9 @@ export function OrgTree() {
     setIsPanning(false);
   }, []);
 
-  const handleBackgroundClick = useCallback((e: React.MouseEvent) => {
-    if (e.target === e.currentTarget || (e.target as HTMLElement).classList.contains('tree-canvas')) {
+  const handleClick = useCallback((e: React.MouseEvent) => {
+    // Only clear selection if user clicked without dragging
+    if (!didPan.current && (e.target === e.currentTarget || (e.target as HTMLElement).classList.contains('tree-canvas'))) {
       clearSelection();
     }
   }, [clearSelection]);
@@ -91,8 +106,8 @@ export function OrgTree() {
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
-        onClick={handleBackgroundClick}
-        style={{ cursor: isPanning ? 'grabbing' : 'default' }}
+        onClick={handleClick}
+        style={{ cursor: isPanning && didPan.current ? 'grabbing' : 'grab' }}
       >
         <div
           className="tree-canvas"

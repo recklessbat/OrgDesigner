@@ -184,6 +184,15 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
       });
       return prev.map(e => e.id === nodeId ? { ...e, managerId: newManagerId, status: 'modified' as const } : e);
     });
+    // Auto-expand the new parent so the moved node is immediately visible
+    setCollapsedNodes(prev => {
+      if (prev.has(newManagerId)) {
+        const next = new Set(prev);
+        next.delete(newManagerId);
+        return next;
+      }
+      return prev;
+    });
   }, [addChange]);
 
   const moveNodes = useCallback((nodeIds: string[], newManagerId: string) => {
@@ -195,6 +204,15 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
         nodeIds,
       });
       return prev.map(e => nodeIds.includes(e.id) ? { ...e, managerId: newManagerId, status: 'modified' as const } : e);
+    });
+    // Auto-expand the new parent
+    setCollapsedNodes(prev => {
+      if (prev.has(newManagerId)) {
+        const next = new Set(prev);
+        next.delete(newManagerId);
+        return next;
+      }
+      return prev;
     });
   }, [addChange]);
 
@@ -224,6 +242,15 @@ export function OrgProvider({ children }: { children: React.ReactNode }) {
       nodeIds: [newId],
     });
     setEmployees(prev => [...prev, newEmp]);
+    // Auto-expand the parent so the new position is visible
+    setCollapsedNodes(prev => {
+      if (prev.has(managerId)) {
+        const next = new Set(prev);
+        next.delete(managerId);
+        return next;
+      }
+      return prev;
+    });
   }, [employees, addChange]);
 
   const flagForRemoval = useCallback((nodeId: string) => {
