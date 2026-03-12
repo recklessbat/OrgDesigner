@@ -829,8 +829,8 @@ body {
   top: 0;
   left: 50%;
   height: 24px;
-  width: 1px;
-  background: var(--border-medium);
+  width: 2px;
+  background: #9CA3AF;
 }
 
 .tree-child-wrapper {
@@ -845,15 +845,15 @@ body {
   top: 0;
   left: 0;
   right: 0;
-  height: 1px;
-  background: var(--border-medium);
+  height: 2px;
+  background: #9CA3AF;
 }
 
 .tree-child-wrapper::before {
   content: '';
-  width: 1px;
+  width: 2px;
   height: 12px;
-  background: var(--border-medium);
+  background: #9CA3AF;
   position: absolute;
   top: -12px;
 }
