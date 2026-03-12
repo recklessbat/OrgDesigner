@@ -731,8 +731,8 @@ body {
   overflow: hidden;
   background: var(--bg-secondary);
   background-image:
-    radial-gradient(circle, var(--border-light) 1px, transparent 1px);
-  background-size: 24px 24px;
+    radial-gradient(circle, rgba(0,0,0,0.04) 0.5px, transparent 0.5px);
+  background-size: 32px 32px;
 }
 
 .zoom-controls {
