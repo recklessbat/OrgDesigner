@@ -782,6 +782,20 @@ body {
   width: 100%;
   height: 100%;
   overflow: hidden;
+  cursor: grab;
+}
+
+.tree-viewport.is-panning {
+  cursor: grabbing;
+}
+
+/* Node cards get their own cursor, not the viewport's */
+.tree-viewport .org-node-card {
+  cursor: grab;
+}
+
+.tree-viewport .org-node-card:active {
+  cursor: grabbing;
 }
 
 .tree-canvas {

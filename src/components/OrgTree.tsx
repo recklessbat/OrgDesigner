@@ -104,14 +104,13 @@ export function OrgTree() {
       </div>
 
       <div
-        className="tree-viewport"
+        className={`tree-viewport ${isPanning && didPan.current ? 'is-panning' : ''}`}
         onWheel={handleWheel}
         onMouseDown={handleMouseDown}
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
         onMouseLeave={handleMouseUp}
         onClick={handleClick}
-        style={{ cursor: isPanning && didPan.current ? 'grabbing' : 'grab' }}
       >
         <div
           className="tree-canvas"

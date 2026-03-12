@@ -99,6 +99,7 @@ export function OrgNodeCard({ node }: OrgNodeCardProps) {
           backgroundColor: getBackgroundColor(),
         }}
         draggable
+        onMouseDown={e => e.stopPropagation()}
         onDragStart={handleDragStart}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
