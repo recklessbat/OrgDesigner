@@ -56,7 +56,11 @@ export function OrgTree() {
   }, []);
 
   const handleMouseDown = useCallback((e: React.MouseEvent) => {
-    // Left click or middle click on background starts panning
+    // Only start panning when clicking on the background, not on node cards
+    const target = e.target as HTMLElement;
+    const isOnNode = target.closest('.org-node-card');
+    if (isOnNode) return; // Let node handle its own drag
+
     if (e.button === 0 || e.button === 1) {
       e.preventDefault();
       setIsPanning(true);
