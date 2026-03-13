@@ -817,29 +817,39 @@ body {
   box-shadow: 0 0 0 3px var(--accent-blue), var(--shadow-md);
 }
 
+/* ---- Org chart connectors ---- */
 /* Vertical line from parent bottom-center down to the horizontal rail */
 .tree-children {
   display: flex;
-  gap: 20px;
+  gap: 24px;
   padding-top: 40px;
   position: relative;
 }
 
+/* Vertical stem from parent center down to rail level */
 .tree-children::before {
   content: '';
   position: absolute;
   top: 0;
   left: 50%;
-  transform: translateX(-50%);
-  height: 20px;
   width: 2px;
-  background: #9CA3AF;
+  height: 20px;
+  background: var(--border-medium, #9CA3AF);
+  transform: translateX(-50%);
 }
 
-/* Horizontal rail connecting all children — hidden for connectors div,
-   we use child ::after instead */
-.tree-connector-vertical {
-  display: none;
+/* Single-child case: extend stem the full 40px (no rail needed) */
+.tree-children:has(> .tree-child-wrapper:only-child)::before {
+  height: 40px;
+}
+
+/* Horizontal rail — JS-measured left/right via inline style */
+.tree-connector-rail {
+  position: absolute;
+  top: 20px;
+  height: 2px;
+  background: var(--border-medium, #9CA3AF);
+  pointer-events: none;
 }
 
 /* Each child wrapper */
@@ -851,67 +861,20 @@ body {
   padding-top: 20px;
 }
 
-/* Vertical line from horizontal rail down to child top-center */
+/* Vertical line from rail down to child node */
 .tree-child-wrapper::before {
   content: '';
-  width: 2px;
-  height: 20px;
-  background: #9CA3AF;
   position: absolute;
   top: 0;
   left: 50%;
+  width: 2px;
+  height: 20px;
+  background: var(--border-medium, #9CA3AF);
   transform: translateX(-50%);
 }
 
-/* Horizontal rail segments — each child extends a rail to the right,
-   connecting to the next sibling's center */
-.tree-child-wrapper::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  height: 2px;
-  background: #9CA3AF;
-  /* Extend from this child's center to halfway to the next child */
-  left: 50%;
-  right: -10px; /* half of the 20px gap */
-}
-
-/* Last child: rail extends leftward only */
-.tree-child-wrapper:last-child::after {
-  left: auto;
-  right: 50%;
-  width: 0;
-}
-
-/* Single child: no horizontal rail, extend parent vertical line fully */
-.tree-child-wrapper:only-child::after {
-  display: none;
-}
-
-.tree-children:has(> .tree-child-wrapper:only-child)::before {
-  height: 40px;
-}
-
-/* Middle children: rail extends full width across the gap */
-.tree-child-wrapper:not(:first-child):not(:last-child)::after {
-  left: -10px;
-  right: -10px;
-}
-
-/* First child: rail from center to right edge */
-.tree-child-wrapper:first-child:not(:only-child)::after {
-  left: 50%;
-  right: -10px;
-}
-
-/* Last child (not only): rail from left edge to center */
-.tree-child-wrapper:last-child:not(:only-child)::after {
-  left: -10px;
-  right: auto;
-  width: calc(50% + 10px);
-}
-
-.tree-connector-horizontal {
+/* Single child doesn't need the short vertical (parent stem covers it) */
+.tree-child-wrapper:only-child::before {
   display: none;
 }
 

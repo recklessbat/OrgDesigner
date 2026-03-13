@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useState, useCallback, useLayoutEffect } from 'react';
 import type { OrgNode as OrgNodeType } from '../types';
 import { OrgNodeCard } from './OrgNode';
 import { useOrg } from '../context/OrgContext';
@@ -6,6 +6,34 @@ import { useOrg } from '../context/OrgContext';
 function OrgTreeBranch({ node, isRoot }: { node: OrgNodeType; isRoot?: boolean }) {
   const { filterConfig } = useOrg();
   const visibleChildren = node.isCollapsed ? [] : node.children;
+  const childrenRef = useRef<HTMLDivElement>(null);
+  const [railStyle, setRailStyle] = useState<React.CSSProperties>({});
+
+  // Measure child positions and set horizontal rail to span exactly
+  // from the center of the first child to the center of the last child
+  useLayoutEffect(() => {
+    if (!childrenRef.current || visibleChildren.length < 2) {
+      setRailStyle({});
+      return;
+    }
+    const container = childrenRef.current;
+    const wrappers = container.querySelectorAll<HTMLElement>(':scope > .tree-child-wrapper');
+    if (wrappers.length < 2) return;
+
+    const measure = () => {
+      const containerRect = container.getBoundingClientRect();
+      const firstRect = wrappers[0].getBoundingClientRect();
+      const lastRect = wrappers[wrappers.length - 1].getBoundingClientRect();
+      const left = firstRect.left + firstRect.width / 2 - containerRect.left;
+      const right = containerRect.right - (lastRect.left + lastRect.width / 2);
+      setRailStyle({ left: `${left}px`, right: `${right}px` });
+    };
+
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(container);
+    return () => observer.disconnect();
+  }, [visibleChildren.length, visibleChildren.map(c => c.id).join(',')]);
 
   // Search highlighting
   const searchMatch = filterConfig.searchQuery
@@ -14,15 +42,18 @@ function OrgTreeBranch({ node, isRoot }: { node: OrgNodeType; isRoot?: boolean }
       node.id.toLowerCase().includes(filterConfig.searchQuery.toLowerCase())
     : false;
 
+  const hasMultipleChildren = visibleChildren.length > 1;
+
   return (
     <div className={`tree-branch ${isRoot ? 'root' : ''} ${searchMatch && filterConfig.searchQuery ? 'search-match' : ''}`}>
       <OrgNodeCard node={node} />
       {visibleChildren.length > 0 && (
-        <div className="tree-children">
-          <div className="tree-connector-vertical" />
+        <div className="tree-children" ref={childrenRef}>
+          {hasMultipleChildren && (
+            <div className="tree-connector-rail" style={railStyle} />
+          )}
           {visibleChildren.map(child => (
             <div key={child.id} className="tree-child-wrapper">
-              <div className="tree-connector-horizontal" />
               <OrgTreeBranch node={child} />
             </div>
           ))}
